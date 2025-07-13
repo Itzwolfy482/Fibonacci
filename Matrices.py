@@ -520,6 +520,59 @@ def MEV4(n=1048576):
         #ff=time.monotonic_ns()
         #print("if:",bb-aa,"init:",cc-bb,"(dont conversion en 2^:",gg-bb,"et matrice fibo:",ll-jj,")","carre:",dd-cc,"petits:",ee-dd,"memoire:",ff-ee)
         return m[0][1]
+        
+def perf(n,func):
+    print("For",n,":",end=" ")
+    b=time.monotonic_ns()
+    f=func(n)
+    c=time.monotonic_ns()
+    number=str(f)
+    chunk_size = 10000
+    for i in range(0, len(number), chunk_size):
+        print(number[i:i+chunk_size],end="")
+    print("")
+    print(f"Runtime",func,"=",(c-b)/10**6,"ms")
 
+def CMFV4(m):
+    a=m[1]*m[1]+m[2]*m[2]
+    b=(m[0]+m[2])*m[1]
+    return [a+b,b,a]
 
-verif(140)
+def VMV1(v1,v2):
+    return [v1[0]*v2[0]+v1[1]*v2[1],v1[0]*v2[1]+v1[1]*v2[2],v1[1]*v2[1]+v1[2]*v2[2]]
+
+def MEV5(n=1048576):
+    #aa=time.monotonic_ns()
+    if n<=70:
+        return new_binet(n)
+    else:
+        #bb=time.monotonic_ns()
+        n_2=dec_power(n)
+        #gg=time.monotonic_ns()
+        lt=[]
+        a=n_2[0]
+        n_2.pop(0)
+        #jj=time.monotonic_ns()
+        m=[mpz(new_binet(65)),mpz(new_binet(64)),mpz(new_binet(63))]
+        #ll=time.monotonic_ns()
+        b=0
+        #cc=time.monotonic_ns()
+        for k in range(6,a):
+            m=CMFV4(m)
+            if k+1 in n_2:
+                lt.append(m)
+                n_2.remove(k+1)
+                b+=1
+        #dd=time.monotonic_ns()
+        for i in n_2:
+            if i<=6:
+                #peut etre plus long, a verifier
+                c=mpz(new_binet(2**i+1))
+                d=mpz(new_binet(2**i))
+                m=VMV1(m,([c,d,c-d]))
+        #ee=time.monotonic_ns()
+        for i in range(b):
+            m=VMV1(m,lt[i])
+        #ff=time.monotonic_ns()
+        #print("if:",bb-aa,"init:",cc-bb,"(dont conversion en 2^:",gg-bb,"et matrice fibo:",ll-jj,")","carre:",dd-cc,"petits:",ee-dd,"memoire:",ff-ee)
+        return m[1]
